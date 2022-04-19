@@ -5,10 +5,8 @@
         "skipLibCheck": true,
         "downlevelIteration": true,
         "sourceMap": true,
-        "outDir": "../lib"
+        "outDir": "lib",
+        "sourceRoot": "src",
     },
-    "files": [
-        "reformat.ts",
-        "popup.ts"
-    ],
 }
+ 

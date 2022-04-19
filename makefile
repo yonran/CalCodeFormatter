@@ -5,7 +5,7 @@ LIB_JS := $(SRC_TS:.ts=.js)
 
 # Compile all typescript code.
 build: $(SRC_TS)
-	cd src && npx tsc
+	npx tsc
 
 # tsc doesn't currently support specifying a tsconfig when compiling
 # specific files. So we just recompile everything because the alternative
