@@ -77,6 +77,33 @@ function surroundedByParentheses(text: string): boolean {
   return text[0] == '(' && text[text.length - 1] == ')';
 }
 
+/**
+ * Given a paragraph of text, returns the words at the beginning
+ * that are surrounded by parentheses
+ *
+ * (note: the content of the counters are not validated yet)
+ */
+function getCounters(text: string): string[] {
+  text = text.replace(/\u00a0/g, ' ');
+  let words: string[] = text.split(' ');
+  let i = 0;
+  // Skip any leading whitespaces
+  // Ex: Harbors & Navigation Code 1.5 Navigable Waters 133c
+  // contains a leading space in front of the (c).
+  while (words[i] === '') {
+    ++i;
+  }
+  const counters: string[] = [];
+  while (surroundedByParentheses(words[i])) {
+    let word = words[i];
+    // Strip the parantheses.
+    word = word.replace(/[()]/g, '');
+    counters.push(word);
+    i++;
+  }
+  return counters;
+}
+
 // Takes in NodeElements and runs the formatting logic on them.
 function formatNodes(text_children_nodes: Node[]) {
   // The order of the civil code nesting structure is
@@ -101,6 +128,10 @@ function formatNodes(text_children_nodes: Node[]) {
   // it as a roman numeral as opposed to a letter.
   let level = 0;
   let last_heading = '';
+  // Padding is determined by the first heading level encountered.
+  // However level is set according to all headings on a line.
+  let found_padding_level = false;
+  let padding_level = 0;
   for (let text_node of Array.from(text_children_nodes)) {
     let text_or_null: string | null = text_node.textContent;
     let text: string;
@@ -109,28 +140,8 @@ function formatNodes(text_children_nodes: Node[]) {
     } else {
       text = text_or_null;
     }
-    // There are empty <p> tags inbetween sections.
-    if (text.length == 0) {
-      continue;
-    }
-    // Remove non-breaking spaces.
-    text = text.replace(/\u00a0/g, ' ');
-    let words: string[] = text.split(' ');
-    let i = 0;
-    // Padding is determined by the first heading level encountered.
-    // However level is set according to all headings on a line.
-    let found_padding_level = false;
-    let padding_level = 0;
-    // Skip any leading whitespaces
-    // Ex: Harbors & Navigation Code 1.5 Navigable Waters 133c
-    // contains a leading space in front of the (c).
-    while (words[i] === '') {
-      ++i;
-    }
-    while (surroundedByParentheses(words[i])) {
-      let word = words[i];
-      // Strip the parantheses.
-      word = word.replace(/[()]/g, '');
+    const counters = getCounters(text);
+    for (const word of counters) {
       // Turn back, traveler, for Here lies the core of the parsing logic.
 
       // These are ternary expressions which aren't very clear, but are
@@ -193,7 +204,6 @@ function formatNodes(text_children_nodes: Node[]) {
         padding_level = level;
       }
       last_heading = word;
-      ++i;
     }
     found_padding_level = false;
     // Set padding based on padding level.
