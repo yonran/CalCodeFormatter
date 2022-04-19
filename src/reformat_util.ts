@@ -54,6 +54,10 @@ function isUpperCaseLetter(text: string): boolean {
   return text.toUpperCase() == text;
 }
 
+function isHtmlElement(node: Node): node is HTMLElement {
+  return node.nodeType === Node.ELEMENT_NODE && 'style' in node;
+}
+
 function isUpperCaseRomanNumeral(text: string) {
   let matches: string[] | null = text.match(/[MDCLXVI]+/g);
   if (matches && matches.length == 1 && matches[0].length === text.length) {
@@ -94,7 +98,7 @@ function getCounters(text: string): string[] {
     ++i;
   }
   const counters: string[] = [];
-  while (surroundedByParentheses(words[i])) {
+  while (i < words.length && surroundedByParentheses(words[i])) {
     let word = words[i];
     // Strip the parantheses.
     word = word.replace(/[()]/g, '');
@@ -104,8 +108,7 @@ function getCounters(text: string): string[] {
   return counters;
 }
 
-// Takes in NodeElements and runs the formatting logic on them.
-function formatNodes(text_children_nodes: Node[]) {
+export function getLevels(counters: string[][]): number[] {
   // The order of the civil code nesting structure is
   // (a) (1) (A) (roman i)( roman I) (ia)
   // Parsing this is complicated by the collision between the first-level
@@ -132,16 +135,9 @@ function formatNodes(text_children_nodes: Node[]) {
   // However level is set according to all headings on a line.
   let found_padding_level = false;
   let padding_level = 0;
-  for (let text_node of Array.from(text_children_nodes)) {
-    let text_or_null: string | null = text_node.textContent;
-    let text: string;
-    if (!text_or_null) {
-      continue;
-    } else {
-      text = text_or_null;
-    }
-    const counters = getCounters(text);
-    for (const word of counters) {
+  const levels = [];
+  for (let paragraph of counters) {
+    for (const word of paragraph) {
       // Turn back, traveler, for Here lies the core of the parsing logic.
 
       // These are ternary expressions which aren't very clear, but are
@@ -206,12 +202,35 @@ function formatNodes(text_children_nodes: Node[]) {
       last_heading = word;
     }
     found_padding_level = false;
-    // Set padding based on padding level.
-    let padding = padding_level * 25;
-    let text_element = text_node as HTMLElement;
+    levels.push(padding_level);
+  }
+  return levels;
+}
 
-    text_element.style.marginLeft = `${padding}px`;
-    text_element.style.display = 'block';
+// Takes in NodeElements and runs the formatting logic on them.
+function formatNodes(text_children_nodes: Node[]) {
+  const allCounters = []
+  let elements = text_children_nodes.filter(isHtmlElement);
+  for (let text_node of Array.from(elements)) {
+    let text_or_null: string | null = text_node.textContent;
+    let text: string;
+    if (!text_or_null) {
+      text = '';
+    } else {
+      text = text_or_null;
+    }
+    const countersInParagraph = getCounters(text);
+    allCounters.push(countersInParagraph)
+  }
+  const nodeLevels = getLevels(allCounters);
+  if (nodeLevels.length !== allCounters.length) {
+    throw new Error('getLevels returned wrong size array')
+  }
+  for (let [i, text_node] of Array.from(elements).entries()) {
+    const padding_level = nodeLevels[i];
+    let padding = padding_level * 25;
+    text_node.style.marginLeft = `${padding}px`;
+    text_node.style.display = 'block';
   }
 }
 
