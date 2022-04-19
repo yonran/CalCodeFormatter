@@ -2,11 +2,23 @@
     "compilerOptions": {
         "target": "es2022",
         "module": "es2022",
+        // enable importing @types from node_modules
+        "moduleResolution": "Node",
         "skipLibCheck": true,
-        "downlevelIteration": true,
         "sourceMap": true,
         "outDir": "lib",
-        "sourceRoot": "src",
+        "rootDirs": [
+            // to type-check jest.config.ts,
+            "src",
+        ]
     },
+    "include": ["src"],
+    "ts-node": {
+        "moduleTypes": {
+            // jest 27 requires jest.config.ts to be a CommonJS module
+            // https://github.com/facebook/jest/issues/11453#issuecomment-957915867
+            "jest.config.ts": "cjs"
+        }
+    }
 }
  
