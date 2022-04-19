@@ -14,8 +14,20 @@
         "128": "/icon128.png"
     },
     "content_scripts": [{
-        "matches": ["https://leginfo.legislature.ca.gov/faces/codes_displayText*", "https://leginfo.legislature.ca.gov/faces/codes_displaySection*", "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml*"],
+        "matches": [
+            "https://leginfo.legislature.ca.gov/faces/codes_displayText*",
+            "https://leginfo.legislature.ca.gov/faces/codes_displaySection*",
+            "https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml*"
+        ],
         "css": ["reformat.css"],
         "js": ["reformat.js"]
-    }]
+    }],
+    "web_accessible_resources": [
+        {
+            "resources": ["reformat_util.js"],
+            "matches": [
+                "https://leginfo.legislature.ca.gov/*"
+            ]
+        }
+    ]
 }

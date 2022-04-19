@@ -1,11 +1,14 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "es2022",
+        "module": "es2022",
+        "skipLibCheck": true,
         "downlevelIteration": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "outDir": "../lib"
     },
     "files": [
         "reformat.ts",
         "popup.ts"
-    ]
+    ],
 }
